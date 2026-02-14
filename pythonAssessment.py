@@ -172,6 +172,75 @@ def read_article_from_file(filename):
         return ""
 
 
+def get_valid_filename():
+    """
+    Get a valid filename from the user using a while loop.
+    Continues prompting until a valid file is provided or user skips.
+    
+    Returns:
+        str: The filename or empty string to use sample text
+    """
+    max_attempts = 3
+    attempts = 0
+    
+    while attempts < max_attempts:
+        filename = input("\nEnter the path to the news article file (or press Enter to use sample text): ").strip()
+        
+        # Conditional: Check if user wants to skip
+        if not filename:
+            print("Using sample news article text.")
+            return ""
+        
+        # Conditional: Check if file exists and is readable
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                # Try to read a small portion to verify it's readable
+                file.read(100)
+            print(f"File '{filename}' found and is readable.")
+            return filename
+        except FileNotFoundError:
+            attempts += 1
+            remaining = max_attempts - attempts
+            if remaining > 0:
+                print(f"File not found. You have {remaining} attempt(s) remaining.")
+            else:
+                print("Maximum attempts reached. Using sample text instead.")
+                return ""
+        except Exception as e:
+            attempts += 1
+            remaining = max_attempts - attempts
+            if remaining > 0:
+                print(f"Error reading file: {e}. You have {remaining} attempt(s) remaining.")
+            else:
+                print("Maximum attempts reached. Using sample text instead.")
+                return ""
+    
+    return ""
+
+
+def get_search_word():
+    """
+    Get a search word from the user with validation using a while loop.
+    
+    Returns:
+        str: The search word (validated to contain only letters)
+    """
+    while True:
+        search_word = input("\nEnter a word to count (letters only, or press Enter to use 'artificial'): ").strip()
+        
+        # Conditional: Check if user pressed Enter
+        if not search_word:
+            search_word = "artificial"
+            print(f"Using default search word: '{search_word}'")
+            return search_word
+        
+        # Conditional: Validate that the word contains only letters
+        if re.match(r'^[a-zA-Z]+$', search_word):
+            return search_word
+        else:
+            print("Invalid input. Please enter a word containing only letters.")
+
+
 def display_analysis_results(text, search_word=None):
     """
     Perform all text analysis tasks and display the results.
@@ -180,32 +249,67 @@ def display_analysis_results(text, search_word=None):
         text (str): The text to analyze
         search_word (str): Optional word to search for
     """
-    print("=" * 60)
+    print("\n" + "=" * 60)
     print("TEXT ANALYSIS RESULTS")
     print("=" * 60)
     
-    # Task 1: Count specific word
+    # Task 1: Count specific word (with conditional)
     if search_word:
         word_count = count_specific_word(text, search_word)
         print(f"\n1. Count of '{search_word}': {word_count}")
+        
+        # Conditional: Provide feedback based on count
+        if word_count == 0:
+            print("   Note: The word was not found in the text.")
+        elif word_count == 1:
+            print("   Note: The word appears once in the text.")
+        else:
+            print(f"   Note: The word appears multiple times in the text.")
     else:
         print("\n1. No specific word provided for counting.")
     
-    # Task 2: Most common word
+    # Task 2: Most common word (with conditional)
     most_common = identify_most_common_word(text)
-    print(f"\n2. Most common word: {most_common}")
+    if most_common:
+        print(f"\n2. Most common word: '{most_common}'")
+    else:
+        print("\n2. Most common word: None (text is empty)")
     
-    # Task 3: Average word length
+    # Task 3: Average word length (with conditional)
     avg_length = calculate_average_word_length(text)
     print(f"\n3. Average word length: {avg_length:.2f} characters")
     
-    # Task 4: Paragraph count
+    # Conditional: Provide interpretation
+    if avg_length == 0:
+        print("   Note: No valid words found in the text.")
+    elif avg_length < 4:
+        print("   Note: Text uses relatively short words.")
+    elif avg_length < 6:
+        print("   Note: Text uses medium-length words.")
+    else:
+        print("   Note: Text uses relatively long words.")
+    
+    # Task 4: Paragraph count (with conditional)
     paragraph_count = count_paragraphs(text)
     print(f"\n4. Number of paragraphs: {paragraph_count}")
     
-    # Task 5: Sentence count
+    # Conditional: Provide feedback
+    if paragraph_count == 1:
+        print("   Note: The text consists of a single paragraph.")
+    else:
+        print(f"   Note: The text is organized into {paragraph_count} paragraphs.")
+    
+    # Task 5: Sentence count (with conditional)
     sentence_count = count_sentences(text)
     print(f"\n5. Number of sentences: {sentence_count}")
+    
+    # Conditional: Provide feedback
+    if sentence_count == 1:
+        print("   Note: The text contains a single sentence.")
+    elif sentence_count < 5:
+        print("   Note: The text is relatively brief.")
+    else:
+        print(f"   Note: The text contains multiple sentences.")
     
     print("\n" + "=" * 60)
 
@@ -213,21 +317,33 @@ def display_analysis_results(text, search_word=None):
 def main():
     """
     Main function to run the text analysis program.
+    Uses while loop for menu-driven interaction.
     """
-    print("News Article Text Analysis Tool")
+    print("=" * 60)
+    print("NEWS ARTICLE TEXT ANALYSIS TOOL")
     print("=" * 60)
     
-    # Read from a file
-    filename = input("\nEnter the path to the news article file (or press Enter to use sample text): ").strip()
+    # While loop for continuous operation
+    continue_analysis = True
     
-    if filename:
-        article_text = read_article_from_file(filename)
-        if not article_text:
-            print("Unable to read file. Exiting.")
-            return
-    else:
-        # Sample news article for demonstration
-        article_text = """
+    while continue_analysis:
+        print("\n" + "-" * 60)
+        
+        # Get filename with validation (uses while loop internally)
+        filename = get_valid_filename()
+        
+        # Conditional: Determine whether to read from file or use sample text
+        if filename:
+            article_text = read_article_from_file(filename)
+            # Conditional: Check if file reading was successful
+            if not article_text:
+                print("Unable to read file content. Using sample text instead.")
+                filename = ""
+        
+        # Conditional: Use sample text if no valid file
+        if not filename:
+            # Sample news article for demonstration
+            article_text = """
 The impact of artificial intelligence on modern society continues to grow. 
 Artificial intelligence is transforming industries across the globe!
 
@@ -242,17 +358,29 @@ on responsible development and implementation.
 What will the next decade bring? Only time will tell. The AI revolution is 
 just beginning!
 """
-        print("\nUsing sample news article text.")
+        
+        # Get search word with validation (uses while loop internally)
+        search_word = get_search_word()
+        
+        # Perform analysis and display results
+        display_analysis_results(article_text, search_word)
+        
+        # While loop control: Ask if user wants to analyze another article
+        while True:
+            choice = input("\nWould you like to analyze another article? (yes/no): ").strip().lower()
+            
+            # Conditional: Validate user input
+            if choice in ['yes', 'y']:
+                continue_analysis = True
+                break
+            elif choice in ['no', 'n']:
+                continue_analysis = False
+                print("\nThank you for using the News Article Text Analysis Tool!")
+                print("=" * 60)
+                break
+            else:
+                print("Invalid input. Please enter 'yes' or 'no'.")
     
-    # Get word to search for
-    search_word = input("\nEnter a word to count (or press Enter to skip): ").strip()
-    if not search_word:
-        search_word = "artificial"  # Default for demonstration
-        print(f"Using default search word: '{search_word}'")
-    
-    # Perform analysis and display results
-    display_analysis_results(article_text, search_word)
-
 
 if __name__ == "__main__":
     main()
