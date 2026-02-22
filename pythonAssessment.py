@@ -1,6 +1,5 @@
 # pythonAssessment.py
-# Text Analysis Program for News Articles
-
+# Beginner Friendly Text Analysis Program
 
 import string
 from collections import Counter
@@ -10,14 +9,11 @@ from collections import Counter
 # Read File Function
 # -----------------------------
 def read_file(file_path):
-    """
-    Reads the contents of a text file and returns it as a string.
-    """
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
     except FileNotFoundError:
-        print("Error: File not found.")
+        print("File not found. Please check the file path.")
         return ""
 
 
@@ -25,19 +21,13 @@ def read_file(file_path):
 # 1. Count Specific Word
 # -----------------------------
 def count_specific_word(text, search_word):
-    """
-    Counts how many times a specific word appears in the text.
-    Returns an integer.
-    """
     if not text:
         return 0
 
-    # Remove punctuation and convert to lowercase
     text = text.lower()
     search_word = search_word.lower()
 
     words = text.translate(str.maketrans("", "", string.punctuation)).split()
-
     return words.count(search_word)
 
 
@@ -45,58 +35,42 @@ def count_specific_word(text, search_word):
 # 2. Identify Most Common Word
 # -----------------------------
 def identify_most_common_word(text):
-    """
-    Returns the most common word in the text.
-    Returns None if text is empty.
-    """
     if not text.strip():
         return None
 
-    text = text.lower()
-    words = text.translate(str.maketrans("", "", string.punctuation)).split()
+    words = text.lower().translate(
+        str.maketrans("", "", string.punctuation)
+    ).split()
 
     if not words:
         return None
 
     word_counts = Counter(words)
-    most_common_word = word_counts.most_common(1)[0][0]
-
-    return most_common_word
+    return word_counts.most_common(1)[0][0]
 
 
 # -----------------------------
 # 3. Calculate Average Word Length
 # -----------------------------
 def calculate_average_word_length(text):
-    """
-    Calculates the average word length.
-    Returns a float.
-    Returns 0 if text is empty.
-    """
     if not text.strip():
         return 0
 
-    words = text.translate(str.maketrans("", "", string.punctuation)).split()
+    words = text.translate(
+        str.maketrans("", "", string.punctuation)
+    ).split()
 
     if not words:
         return 0
 
     total_length = sum(len(word) for word in words)
-    average = total_length / len(words)
-
-    return average
+    return total_length / len(words)
 
 
 # -----------------------------
 # 4. Count Paragraphs
 # -----------------------------
 def count_paragraphs(text):
-    """
-    Counts the number of paragraphs.
-    Paragraphs are separated by empty lines.
-    Returns an integer.
-    Returns 1 if text is empty.
-    """
     if not text.strip():
         return 1
 
@@ -108,59 +82,76 @@ def count_paragraphs(text):
 # 5. Count Sentences
 # -----------------------------
 def count_sentences(text):
-    """
-    Counts the number of sentences.
-    Sentences end with ., !, or ?
-    Returns an integer.
-    Returns 1 if text is empty.
-    """
     if not text.strip():
         return 1
 
-    sentence_count = 0
+    count = 0
     for char in text:
         if char in ".!?":
-            sentence_count += 1
-
-    return sentence_count
+            count += 1
+    return count
 
 
 # -----------------------------
-# Main Program
+# Main Program (WITH WHILE LOOP)
 # -----------------------------
 def main():
+
     print("=== NEWS ARTICLE TEXT ANALYSIS ===")
 
     file_path = input("Enter the path to the news article file: ")
-
     text = read_file(file_path)
 
+    # Conditional check
     if not text:
-        print("No text to analyze.")
+        print("No text loaded. Program will exit.")
         return
+    else:
+        print("File loaded successfully!\n")
 
-    # Count specific word
-    search_word = input("Enter the word you want to count: ")
-    word_count = count_specific_word(text, search_word)
-    print(f"\nThe word '{search_word}' appears {word_count} times.")
+    # WHILE LOOP to allow repeated analysis
+    while True:
 
-    # Most common word
-    common_word = identify_most_common_word(text)
-    print(f"The most common word is: {common_word}")
+        print("\nChoose an option:")
+        print("1 - Count Specific Word")
+        print("2 - Identify Most Common Word")
+        print("3 - Calculate Average Word Length")
+        print("4 - Count Paragraphs")
+        print("5 - Count Sentences")
+        print("6 - Exit")
 
-    # Average word length
-    avg_length = calculate_average_word_length(text)
-    print(f"The average word length is: {avg_length:.2f}")
+        choice = input("Enter your choice (1-6): ")
 
-    # Paragraph count
-    paragraph_count = count_paragraphs(text)
-    print(f"The number of paragraphs is: {paragraph_count}")
+        # Conditional statements
+        if choice == "1":
+            search_word = input("Enter word to search: ")
+            result = count_specific_word(text, search_word)
+            print(f"The word '{search_word}' appears {result} times.")
 
-    # Sentence count
-    sentence_count = count_sentences(text)
-    print(f"The number of sentences is: {sentence_count}")
+        elif choice == "2":
+            result = identify_most_common_word(text)
+            print(f"Most common word: {result}")
+
+        elif choice == "3":
+            result = calculate_average_word_length(text)
+            print(f"Average word length: {result:.2f}")
+
+        elif choice == "4":
+            result = count_paragraphs(text)
+            print(f"Number of paragraphs: {result}")
+
+        elif choice == "5":
+            result = count_sentences(text)
+            print(f"Number of sentences: {result}")
+
+        elif choice == "6":
+            print("Exiting program. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter a number between 1 and 6.")
 
 
-# Run the program
+# Run program
 if __name__ == "__main__":
     main()
